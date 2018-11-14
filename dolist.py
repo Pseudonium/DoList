@@ -7,12 +7,14 @@ START = 1542057513.2037964
 
 
 class TaskDays:
-    def __init__(self, task):
+    def __init__(self, task, start=None):
         self.task = task
-        self.start = START
+        if start is None:
+            start = START
+        self.start = start
 
     def __str__(self):
-        return "1"
+        return repr(self)
 
     def __repr__(self):
         return "{}(task={}, days={})".format(
@@ -30,24 +32,40 @@ class TaskDays:
         return self.seconds_to_days(time.time())
 
 
-task_list = list()
+class TaskList:
+    def __init__(self, file):
+        self.lst = list()
+        with open(file) as f:
+            for line in f:
+                task, start = line.split(";")
+                self.lst.append(TaskDays(task, float(start)))
+        self.file = file
+
+    def __repr__(self):
+        return str(self.lst)
+
+    def __str__(self):
+        return repr(self)
+
+    def __getitem__(self, index):
+        return self.lst[index]
+
+    def update_file(self):
+        with open(self.file, mode="w") as f:
+            for task in self.lst:
+                f.write("{};{}\n".format(task.task, task.start))
+
+
+task_list = TaskList("data.txt")
 
 
 def add_task(task: str, days=None):
     task = TaskDays(task)
     task_list.append(task)
     with open("data.txt", "a+") as f:
-        f.write("{};{}\n".format(task.task, task.days))
+        f.write("{};{}\n".format(task.task, task.start))
 
 
-add_task("Do German Quizlet.")
-add_task("BMO1 prep.")
-add_task("Clarinet practice.")
-add_task("Brilliant.")
-add_task("Finance.")
-add_task("Anime.")
-add_task("Minecraft.")
-
-print(task_list)
-task_list[0].reset()
+# print(task_list)
+# task_list[0].reset()
 print(task_list)
